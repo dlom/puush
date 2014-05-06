@@ -5,6 +5,14 @@
 #include <string.h>
 #include <curl/curl.h>
 
+/* error codes */
+
+enum puush_error_code {
+    PUUSHE_FAILED_REQUEST,      /* 1 raw request failed (check errno)   */
+    PUUSHE_INVALID_CREDENTIALS, /* 2 your user/pass combo was incorrect */
+    PUUSHE_INVALID_API_KEY      /* 3 your api key was invalid           */
+};
+
 /* types */
 struct puush {
     CURL *curl_handle;
