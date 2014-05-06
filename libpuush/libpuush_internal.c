@@ -54,6 +54,31 @@ char *puush_raw_request(struct puush *this, const char *url, struct curl_httppos
     }
 
     /* finish up */
-    curl_formfree(post_data);
     return recieved_data;
+}
+
+int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
+    /* send the request */
+    char *raw = puush_raw_request(this, PUUSH_EXPAND_ENDPOINT("/api/auth"), post_data);
+    if (raw == NULL) return PUUSHE_FAILED_REQUEST;
+#ifdef PUUSH_VERBOSE
+    fprintf(stderr, "puush_auth got: [%s]\n", raw);
+#endif
+
+    /* test for errors */
+    if (strcmp(raw, "-1") == 0) {
+        free(raw);
+        return PUUSHE_INVALID_API_KEY;
+    }
+
+    /* extract data */
+    char *data = raw;
+    this->is_premium  = puush_extract_int(data);
+    this->api_key     = puush_extract_string(data);
+    this->expiry_date = puush_extract_int(data);
+    this->quota_used  = puush_extract_long(data);
+
+    /* finish up */
+    free(raw);
+    return PUUSHE_SUCCESS;
 }

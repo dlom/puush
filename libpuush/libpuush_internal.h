@@ -28,5 +28,6 @@ size_t puush_concatenator(char *data, size_t size, size_t amount, void *raw_tota
 
 /* internal methods */
 char *puush_raw_request(struct puush *this, const char *url, struct curl_httppost *post_data);
+int puush_auth_generic(struct puush *this, struct curl_httppost *post_data);
 
 #endif
