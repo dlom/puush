@@ -33,14 +33,51 @@ size_t puush_concatenator(char *data, size_t size, size_t amount, void *raw_tota
     return size * amount;
 }
 
+#define PUUSH_MD5_BUF_SIZE 1024
+char *puush_md5_file(FILE *fd) {
+    /* setup */
+    char *hash = malloc((MD5_DIGEST_LENGTH * 2) + 1);
+    hash[MD5_DIGEST_LENGTH * 2] = '\0'; // set early so that we can...
+    if (fd == NULL) return hash; // ...return blank string if null file
+    char *buf = malloc(PUUSH_MD5_BUF_SIZE * sizeof(char));
+    int bytes_read;
+    MD5_CTX raw_md5; // can't be a pointer?
+    unsigned char digest[MD5_DIGEST_LENGTH];
+
+    /* run the hash */
+    MD5_Init(&raw_md5);
+    while ((bytes_read = fread(buf, sizeof(char), PUUSH_MD5_BUF_SIZE, fd)) != 0) {
+        MD5_Update(&raw_md5, buf, bytes_read);
+    }
+    MD5_Final(digest, &raw_md5);
+    int i;
+    for (i = 0; i < MD5_DIGEST_LENGTH; ++i) {
+        sprintf(hash + (i * (2 * sizeof(char))), "%02x", (unsigned int)digest[i]);
+    }
+
+    /* finish up */
+    free(buf);
+    rewind(fd);
+    return hash;
+}
+
+off_t puush_file_size(FILE *fd) {
+    fseek(fd, 0, SEEK_END);
+    off_t size = ftell(fd);
+    rewind(fd);
+    return size;
+}
+
 char *puush_raw_request(struct puush *this, const char *url, struct curl_httppost *post_data) {
+    /* create the response body */
     char *recieved_data = NULL;
 
     /* setup curl */
     curl_easy_setopt(this->curl_handle, CURLOPT_URL,           url);
     curl_easy_setopt(this->curl_handle, CURLOPT_HTTPPOST,      post_data);
-    curl_easy_setopt(this->curl_handle, CURLOPT_WRITEDATA,    &recieved_data);
+    curl_easy_setopt(this->curl_handle, CURLOPT_WRITEDATA,     &recieved_data);
     curl_easy_setopt(this->curl_handle, CURLOPT_WRITEFUNCTION, puush_concatenator);
+    curl_easy_setopt(this->curl_handle, CURLOPT_READFUNCTION,  NULL);
 #ifdef PUUSH_VERBOSE
     curl_easy_setopt(this->curl_handle, CURLOPT_VERBOSE, 1);
 #endif
@@ -58,6 +95,10 @@ char *puush_raw_request(struct puush *this, const char *url, struct curl_httppos
 }
 
 int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
+    /* preparations */
+    if (this == NULL) return PUUSHE_NOT_INITIALZED;
+    free(this->api_key);
+
     /* send the request */
     char *raw = puush_raw_request(this, PUUSH_EXPAND_ENDPOINT("/api/auth"), post_data);
     if (raw == NULL) return PUUSHE_FAILED_REQUEST;
@@ -68,6 +109,8 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     /* test for errors */
     if (strcmp(raw, "-1") == 0) {
         free(raw);
+        free(this->api_key);
+        this->api_key = NULL;
         return PUUSHE_INVALID_API_KEY;
     }
 
@@ -75,7 +118,7 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     char *data = raw;
     this->is_premium  = puush_extract_int(data);
     this->api_key     = puush_extract_string(data);
-    this->expiry_date = puush_extract_int(data);
+    /*  expiry_date  */ puush_extract_skip(data); // expiry_date is unused
     this->quota_used  = puush_extract_long(data);
 
     /* finish up */

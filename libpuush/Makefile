@@ -1,5 +1,5 @@
 CC_FLAGS = -Wall -g
-LD_FLAGS = -lcurl
+LD_FLAGS = -lcurl -lssl -lcrypto
 CC = clang
 
 .PHONY: clean all
