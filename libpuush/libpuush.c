@@ -14,6 +14,14 @@ struct puush *puush_init() {
     return this;
 }
 
+void puush_free(struct puush *this) {
+    curl_easy_cleanup(this->curl_handle);
+    this->curl_handle = NULL;
+    curl_global_cleanup(); // yolo
+    free(this->api_key);
+    free(this);
+}
+
 int puush_auth(struct puush *this, char *api_key) {
     curl_formcreate(fields);
     curl_formadd_field(fields, "k", api_key);
@@ -36,14 +44,6 @@ int puush_auth_p(struct puush *this, char *email, char *password) {
 int puush_reauth(struct puush *this) {
     if (this->api_key == NULL) return PUUSHE_NOT_AUTHED;
     return puush_auth(this, this->api_key);
-}
-
-void puush_free(struct puush *this) {
-    curl_easy_cleanup(this->curl_handle);
-    this->curl_handle = NULL;
-    curl_global_cleanup(); // yolo
-    free(this->api_key);
-    free(this);
 }
 
 int main(int argc, char *argv[]) {

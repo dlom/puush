@@ -30,9 +30,9 @@ struct puush {
 
 /* methods */
 struct puush *puush_init();
+void puush_free(struct puush *this);
 int puush_auth(struct puush *this, char *api_key);
 int puush_auth_p(struct puush *this, char *email, char *password);
 int puush_reauth(struct puush *this);
-void puush_free(struct puush *this);
 
 #endif
