@@ -47,7 +47,10 @@ int puush_auth_p(struct puush *this, char *email, char *password) {
 int puush_reauth(struct puush *this) {
     if (this == NULL) return PUUSHE_NOT_INITIALZED;
     if (this->api_key == NULL) return PUUSHE_NOT_AUTHED;
-    return puush_auth(this, this->api_key);
+    char *api_key = strdup(this->api_key); // jenk
+    int status = puush_auth(this, api_key);
+    free(api_key);
+    return status;
 }
 
 struct puush_upload *puush_upload(struct puush *this, char *name, FILE *fd) {
@@ -94,7 +97,7 @@ struct puush_upload *puush_upload(struct puush *this, char *name, FILE *fd) {
 struct puush_upload *puush_upload_path(struct puush *this, char *file_path) {
     FILE *fd = fopen(file_path, "rb");
     struct puush_upload *upload = puush_upload(this, basename(file_path), fd);
-    fclose(fd);
+    if (fd != NULL) fclose(fd);
     return upload;
 }
 
@@ -107,14 +110,29 @@ void puush_upload_free(struct puush_upload *upload) {
 
 int main(int argc, char *argv[]) {
     struct puush *puush = puush_init();
+    if (puush_auth_p(puush, "email@example.com", "try again")) {
+        printf("auth_p failed\n");
+        puush_free(puush);
+        return 1;
+    }
     if (puush_auth(puush, "get a real key")) {
+        printf("auth failed\n");
+        puush_free(puush);
+        return 1;
+    }
+    if (puush_reauth(puush)) {
+        printf("reauth failed\n");
         puush_free(puush);
         return 1;
     }
 
     struct puush_upload *upload = puush_upload_path(puush, "image.png");
-    printf("go to [%s]\n", upload->url);
-    puush_upload_free(upload);
+    if (upload != NULL) {
+        printf("go to [%s]\n", upload->url);
+        puush_upload_free(upload);
+    } else {
+        printf("upload failed\n");
+    }
 
     puush_free(puush);
 

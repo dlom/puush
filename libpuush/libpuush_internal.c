@@ -98,6 +98,7 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     /* preparations */
     if (this == NULL) return PUUSHE_NOT_INITIALZED;
     free(this->api_key);
+    this->api_key = NULL; // wipe out the old stuff first
 
     /* send the request */
     char *raw = puush_raw_request(this, PUUSH_EXPAND_ENDPOINT("/api/auth"), post_data);
@@ -109,8 +110,6 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     /* test for errors */
     if (strcmp(raw, "-1") == 0) {
         free(raw);
-        free(this->api_key);
-        this->api_key = NULL;
         return PUUSHE_INVALID_API_KEY;
     }
 
