@@ -1,9 +1,6 @@
 #include "libpuush.h"
 #include "libpuush_internal.h"
 
-/* for main() */
-#include <stdio.h>
-
 struct puush *puush_init() {
     curl_global_init(CURL_GLOBAL_ALL); // yolo
     CURL *curl = curl_easy_init();
@@ -221,35 +218,4 @@ int puush_object_each(struct puush_object *object, puush_object_each_callback ca
 void puush_object_free(struct puush_object *object) {
     if (object == NULL) return;
     puush_object_each(object, puush_object_free_single);
-}
-
-// random callback
-int puush_print_info(struct puush_object *cur) {
-    printf("%s [%s]\n", cur->url, cur->filename);
-    return 0;
-}
-
-int main(int argc, char *argv[]) {
-    struct puush *puush = puush_init();
-    if (puush_auth_password(puush, "goodwork@haha.wow", "sucker")) {
-        printf("auth_p failed\n");
-        puush_free(puush);
-        return 1;
-    }
-
-    struct puush_object *upload = puush_upload_path(puush, "image.png");
-    if (upload == NULL) {
-        printf("something messed up\n");
-        puush_free(puush);
-        return 1;
-    }
-    printf("uploaded to [%s] with id '%s'\n", upload->url, upload->id);
-    puush_delete(puush, upload->id);
-    puush_object_free(upload);
-    printf("deleted!\n");
-    printf("except not really, puush still has it up >_>\n");
-
-    puush_free(puush);
-
-    return 0;
 }
