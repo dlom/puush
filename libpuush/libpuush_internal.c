@@ -153,3 +153,18 @@ char *puush_strsep(char **stringp, const char *delim) {
     }
     return begin;
 }
+
+time_t puush_convert_time(char *timestring) {
+    struct tm timestamp = {};
+    /* curse you strptime */
+    char *raw = strdup(timestring);
+    char *data = raw;
+    timestamp.tm_year = puush_seek_int_along_string(data, "-") - 1900;
+    timestamp.tm_mon  = puush_seek_int_along_string(data, "-") - 1;
+    timestamp.tm_mday = puush_seek_int_along_string(data, " ");
+    timestamp.tm_hour = puush_seek_int_along_string(data, ":");
+    timestamp.tm_min  = puush_seek_int_along_string(data, ":");
+    timestamp.tm_sec  = puush_seek_int_to_end(data);
+    free(raw);
+    return timegm(&timestamp) - PUUSH_WEIRD_GMT_OFFSET; // correct timezone
+}

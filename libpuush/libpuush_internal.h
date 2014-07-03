@@ -6,10 +6,14 @@
 #include <curl/curl.h>
 #include <openssl/md5.h>
 #include <math.h>
+#include <time.h>
 #include "libpuush.h"
 
 /* don't use ANYTHING in this file unless you REALLY know what you're doing */
 /* BEWARE: macros that look like functions */
+
+/* constants */
+#define PUUSH_WEIRD_GMT_OFFSET (8 * 60 * 60) /* puush servers are UTC+8? */
 
 /* curl necesities/helpers */
 #define curl_formadd_field(httppost, name, value)        curl_formadd(&httppost, &httppost ## _last, CURLFORM_COPYNAME, name, CURLFORM_COPYCONTENTS, value, CURLFORM_END)
@@ -39,5 +43,8 @@ int puush_object_iterate_remaining(struct puush_object *object);
 #define puush_num_digits(number) (number == 0 ? 1 : (int)floor(log10(number))+1) /* positive numbers only */
 #define puush_create_string_from_number(number) char number ## _s[(puush_num_digits(number) + 1) * sizeof(char)]; sprintf(number ## _s, "%d", number)
 char *puush_strsep(char **stringp, const char *delim); // splits on multi-char tokens
+#define puush_seek_int_along_string(data, to) (int)strtol(puush_strsep(&data, to), NULL, 10)
+#define puush_seek_int_to_end(data) (int)strtol(data, NULL, 10)
+time_t puush_convert_time(char *timestring);
 
 #endif

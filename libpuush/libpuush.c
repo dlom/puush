@@ -149,6 +149,7 @@ struct puush_object *puush_history(struct puush *this, int amount, int offset) {
         /* extract individual puush */
         next->id         = puush_extract_string(data);
         char *timestring = puush_extract_string(data);
+        next->timestamp  = puush_convert_time(timestring);
         next->url        = puush_extract_string(data);
         next->filename   = puush_extract_string(data);
         next->views      = puush_extract_int(data);
