@@ -118,7 +118,7 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     char *data = raw;
     this->is_premium  = puush_extract_int(data);
     this->api_key     = puush_extract_string(data);
-    /*  expiry_date  */ puush_extract_skip(data); // expiry_date is unused
+    /* expiry_date   */ puush_extract_skip(data); // expiry_date is unused
     this->quota_used  = puush_extract_long(data);
 
     /* finish up */
