@@ -173,6 +173,39 @@ struct puush_object *puush_history(struct puush *this, int amount, int offset) {
     return head;
 }
 
+int puush_delete(struct puush *this, char *id) {
+    /* check if authed */
+    int auth_result = puush_reauth(this);
+    if (auth_result) return auth_result;
+
+    curl_formcreate(fields);
+    curl_formadd_field(fields, "k", this->api_key);
+    curl_formadd_field(fields, "i", id);
+    curl_formadd_field(fields, "z", "poop"); // really
+    curl_formadd_field(fields, "l", "0");
+    curl_formadd_field(fields, "o", "0");
+
+    /* send request */
+    char *raw = puush_raw_request(this, PUUSH_EXPAND_ENDPOINT("/api/del"), fields);
+    curl_formfree(fields);
+    printf("got [%s]\n", raw);
+    return 0;
+    if (raw == NULL) return PUUSHE_FAILED_REQUEST;
+#ifdef PUUSH_VERBOSE
+    fprintf(stderr, "puush_delete got: [%s]\n", raw);
+#endif
+
+    /* error check */
+    if (raw[0] == '-') {
+        free(raw);
+        return PUUSHE_UNKNOWN_ERROR; // TODO real error handling everywhere
+    }
+
+    /* finish up */
+    free(raw);
+    return PUUSHE_SUCCESS;
+}
+
 int puush_object_each(struct puush_object *object, puush_object_each_callback callback) {
     if (object == NULL) return 0;
     struct puush_object *head = object;
@@ -198,16 +231,23 @@ int puush_print_info(struct puush_object *cur) {
 
 int main(int argc, char *argv[]) {
     struct puush *puush = puush_init();
-    if (puush_auth_password(puush, "haha@example.com", "nope")) {
+    if (puush_auth_password(puush, "goodwork@haha.wow", "sucker")) {
         printf("auth_p failed\n");
         puush_free(puush);
         return 1;
     }
 
-    struct puush_object *history = puush_history(puush, 100, 0);
-    printf("actually got %d puushes\n", history->remaining + 1);
-    puush_object_each(history, puush_print_info);
-    puush_object_free(history);
+    struct puush_object *upload = puush_upload_path(puush, "image.png");
+    if (upload == NULL) {
+        printf("something messed up\n");
+        puush_free(puush);
+        return 1;
+    }
+    printf("uploaded to [%s] with id '%s'\n", upload->url, upload->id);
+    puush_delete(puush, upload->id);
+    puush_object_free(upload);
+    printf("deleted!\n");
+    printf("except not really, puush still has it up >_>\n");
 
     puush_free(puush);
 

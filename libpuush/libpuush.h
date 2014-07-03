@@ -53,6 +53,7 @@ int puush_reauth(struct puush *this);
 struct puush_object *puush_upload(struct puush *this, char *name, FILE *fd); // the name of the file on the server
 struct puush_object *puush_upload_path(struct puush *this, char *file_path);
 struct puush_object *puush_history(struct puush *this, int amount, int offset);
+int puush_delete(struct puush *this, char *id);
 int puush_object_each(struct puush_object *head, puush_object_each_callback callback);
 void puush_object_free(struct puush_object *upload);
 
