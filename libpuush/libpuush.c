@@ -33,7 +33,7 @@ int puush_auth(struct puush *this, char *api_key) {
     return status;
 }
 
-int puush_auth_p(struct puush *this, char *email, char *password) {
+int puush_auth_password(struct puush *this, char *email, char *password) {
     curl_formcreate(fields);
     curl_formadd_field(fields, "e", email);
     curl_formadd_field(fields, "p", password);
@@ -110,7 +110,7 @@ void puush_upload_free(struct puush_upload *upload) {
 
 int main(int argc, char *argv[]) {
     struct puush *puush = puush_init();
-    if (puush_auth_p(puush, "email@example.com", "try again")) {
+    if (puush_auth_password(puush, "email@example.com", "try again")) {
         printf("auth_p failed\n");
         puush_free(puush);
         return 1;

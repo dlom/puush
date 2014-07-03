@@ -9,13 +9,6 @@
 
 /* don't use ANYTHING in this file unless you REALLY know what you're doing */
 
-/* internal types */
-struct puush_form_data {
-    char *name;
-    char *value;
-    int is_file;
-};
-
 /* curl necesities/helpers */
 #define curl_formadd_field(httppost, name, value)        curl_formadd(&httppost, &httppost ## _last, CURLFORM_COPYNAME, name, CURLFORM_COPYCONTENTS, value, CURLFORM_END)
 #define curl_formadd_file(httppost, name, file_name, fd) curl_formadd(&httppost, &httppost ## _last, CURLFORM_COPYNAME, name, CURLFORM_STREAM, fd, CURLFORM_FILENAME, file_name, CURLFORM_CONTENTSLENGTH, puush_file_size(fd), CURLFORM_END)

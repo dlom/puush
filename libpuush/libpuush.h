@@ -37,9 +37,10 @@ struct puush_upload {
 struct puush *puush_init();
 void puush_free(struct puush *this);
 int puush_auth(struct puush *this, char *api_key);
-int puush_auth_p(struct puush *this, char *email, char *password);
+int puush_auth_password(struct puush *this, char *email, char *password);
 int puush_reauth(struct puush *this);
 struct puush_upload *puush_upload(struct puush *this, char *name, FILE *fd); // the name of the file on the server
 struct puush_upload *puush_upload_path(struct puush *this, char *file_path);
 void puush_upload_free(struct puush_upload *upload);
+
 #endif

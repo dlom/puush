@@ -2,19 +2,20 @@
 
 size_t puush_concatenator(char *data, size_t size, size_t amount, void *raw_total) {
     /* initialize total if NULL */
-    char *total = *((char **)raw_total);
+    char *total = *((char **)raw_total); // raw_total points to a char pointer
     if (total == NULL) {
-        total = malloc(sizeof(char));
-        if (total == NULL) return 0;
+        total = malloc(1 * sizeof(char));
+        if (total == NULL) return -1;
         total[0] = '\0';
     }
     size_t total_length = strlen(total);
 
     /* resize total to new length */
-    char *buf = realloc(total, total_length + (size * amount) + 1);
+    char *buf = realloc(total, total_length + (size * amount) + (1 * sizeof(char)));
     if (buf == NULL) {
         free(total);
-        return 0;
+        total = NULL;
+        return -1;
     }
     total = buf;
 
@@ -22,7 +23,7 @@ size_t puush_concatenator(char *data, size_t size, size_t amount, void *raw_tota
     buf = strndup(data, size * amount); // reuse buf
     if (buf == NULL) {
         free(total);
-        return 0;
+        return -1;
     }
     memcpy(total + total_length, buf, (size * amount));
     free(buf);
@@ -36,7 +37,7 @@ size_t puush_concatenator(char *data, size_t size, size_t amount, void *raw_tota
 #define PUUSH_MD5_BUF_SIZE 1024
 char *puush_md5_file(FILE *fd) {
     /* setup */
-    char *hash = malloc((MD5_DIGEST_LENGTH * 2) + 1);
+    char *hash = malloc(((MD5_DIGEST_LENGTH * 2) + 1) * sizeof(char)); // hexadecimal string + terminator
     hash[MD5_DIGEST_LENGTH * 2] = '\0'; // set early so that we can...
     if (fd == NULL) return hash; // ...return blank string if null file
     char *buf = malloc(PUUSH_MD5_BUF_SIZE * sizeof(char));
