@@ -125,3 +125,31 @@ int puush_auth_generic(struct puush *this, struct curl_httppost *post_data) {
     free(raw);
     return PUUSHE_SUCCESS;
 }
+
+int puush_object_free_single(struct puush_object *object) {
+    free(object->url); object->url = NULL;
+    free(object->id); object->id = NULL;
+    free(object->filename); object->filename = NULL;
+    free(object);
+    return 0;
+}
+
+int puush_object_iterate_remaining(struct puush_object *object) {
+    object->remaining += 1;
+    return 0;
+}
+
+// re-implement strsep to split on multi-char tokens
+// otherwise, should work exactly the same, maybe slower
+char *puush_strsep(char **stringp, const char *delim) {
+    if (*stringp == NULL) return NULL;
+    char *begin = *stringp;
+    char *end = strstr(*stringp, delim);
+    if (end == NULL) {
+        *stringp = NULL;
+    } else {
+        *end = '\0';
+        *stringp = end + strlen(delim);
+    }
+    return begin;
+}
