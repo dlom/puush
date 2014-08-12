@@ -1,13 +1,13 @@
-CC_FLAGS = -Wall -g -I./libpuush
+CC_FLAGS = -I./libpuush -Wall
 LD_FLAGS = -L./libpuush -lpuush
-CC = gcc
+CC = clang
 
 .PHONY: clean all run
 
 all: libpuush-test
 
 run: libpuush-test
-	export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./libpuush && ./libpuush-test
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./libpuush ./libpuush-test
 
 libpuush-test: libpuush-test.c libpuush/libpuush.so
 	$(CC) $(CC_FLAGS) libpuush-test.c -o libpuush-test $(LD_FLAGS)

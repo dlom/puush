@@ -38,7 +38,7 @@ struct puush_object {
     struct puush_object *next;
 };
 
-typedef int (*puush_object_each_callback)(struct puush_object *head);
+typedef int (*puush_object_each_callback)(struct puush_object *object); // return 0 for success, anything else for failure
 
 /* static defines */
 #define PUUSH_BASE_URL "http://puush.me"
@@ -52,9 +52,9 @@ int puush_auth_password(struct puush *this, char *email, char *password);
 int puush_reauth(struct puush *this);
 struct puush_object *puush_upload(struct puush *this, char *name, FILE *fd); // the name of the file on the server
 struct puush_object *puush_upload_path(struct puush *this, char *file_path);
-struct puush_object *puush_history(struct puush *this, int amount, int offset);
+struct puush_object *puush_history(struct puush *this, int amount, int offset); // objects returned NOT guarenteed to be same as amount
 int puush_delete(struct puush *this, char *id);
 int puush_object_each(struct puush_object *head, puush_object_each_callback callback);
-void puush_object_free(struct puush_object *upload);
+void puush_object_free(struct puush_object *head);
 
 #endif

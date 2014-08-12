@@ -152,7 +152,7 @@ struct puush_object *puush_history(struct puush *this, int amount, int offset) {
         next->views      = puush_extract_int(data);
         next->remaining  = 0;
         next->next       = NULL; // temporary so we can loop over
-        puush_object_each(head, puush_object_iterate_remaining);
+        puush_object_each(head, puush_object_iterate_remaining); // set the "remaining" variable
 
         /* finish this node */
         if (prev != NULL) prev->next = next;
@@ -185,8 +185,6 @@ int puush_delete(struct puush *this, char *id) {
     /* send request */
     char *raw = puush_raw_request(this, PUUSH_EXPAND_ENDPOINT("/api/del"), fields);
     curl_formfree(fields);
-    printf("got [%s]\n", raw);
-    return 0;
     if (raw == NULL) return PUUSHE_FAILED_REQUEST;
 #ifdef PUUSH_VERBOSE
     fprintf(stderr, "puush_delete got: [%s]\n", raw);
@@ -203,14 +201,14 @@ int puush_delete(struct puush *this, char *id) {
     return PUUSHE_SUCCESS;
 }
 
-int puush_object_each(struct puush_object *object, puush_object_each_callback callback) {
-    if (object == NULL) return 0;
-    struct puush_object *head = object;
-    while (head != NULL) {
-        struct puush_object *next = head->next;
-        int result = callback(head);
+int puush_object_each(struct puush_object *head, puush_object_each_callback callback) {
+    if (head == NULL) return 0;
+    struct puush_object *changing_head = head;
+    while (changing_head != NULL) {
+        struct puush_object *next = changing_head->next;
+        int result = callback(changing_head);
         if (result) return result;
-        head = next;
+        changing_head = next;
     }
     return 0;
 }
