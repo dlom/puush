@@ -13,7 +13,7 @@ libpuush-test: libpuush-test.c libpuush/libpuush.so
 	$(CC) $(CC_FLAGS) libpuush-test.c -o libpuush-test $(LD_FLAGS)
 
 libpuush/libpuush.so:
-	cd libpuush && $(MAKE)
+	cd libpuush && $(MAKE) libpuush.so
 
 clean:
 	rm -f ./libpuush-test
