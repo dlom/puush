@@ -7,7 +7,7 @@ CC = clang
 all: libpuush-test
 
 run: libpuush-test
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:./libpuush ./libpuush-test
+	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:./libpuush ./libpuush-test
 
 libpuush-test: libpuush-test.c libpuush/libpuush.so
 	$(CC) $(CC_FLAGS) libpuush-test.c -o libpuush-test $(LD_FLAGS)
